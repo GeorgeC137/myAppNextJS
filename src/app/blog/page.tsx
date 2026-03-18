@@ -6,7 +6,7 @@ import { getPosts } from '@/lib/data'
 
 // FETCH DATA WITH AN APAI CALL
 const getData = async () => {
-  const res = await fetch('http://localhost:3000/api/blog', { next: { revalidate: 3600 } })
+  const res = await fetch('http://localhost:3000/api/blog', { cache: 'no-store' })
 
   if (!res.ok) {
     throw new Error('Failed to fetch data')
@@ -25,6 +25,7 @@ const BlogPage = async () => {
   // FETCH DATA WITHOUT AN APAI
   // const posts = await getPosts()
   // console.log(posts)
+  // console.log("Total posts fetched:", posts.length)
 
   return (
     <div className={styles.container}>

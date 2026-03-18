@@ -5,8 +5,10 @@ import GoogleProvider from "next-auth/providers/google";
 import { connectToDB } from "./utils"
 import { User } from "./models"
 import bcrypt from "bcryptjs"
+import { authConfig } from "./auth.config"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+    ...authConfig,
     providers: [
         GithubProvider({
             clientId: process.env.GITHUB_ID ?? (() => { throw new Error("GITHUB_ID is not defined") })(),
@@ -35,7 +37,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     throw new Error("Username and password are required");
                 }
 
-                connectToDB();
+                await connectToDB();
 
                 const user = await User.findOne({ username: credentials?.username });
 
@@ -53,7 +55,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     throw new Error("Invalid password");
                 }
 
-                return { id: user._id.toString(), name: user.username, email: user.email };
+                return { id: user._id.toString(), name: user.username, email: user.email, isAdmin: user.isAdmin ?? false };
             }
         })
     ],
@@ -61,10 +63,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         async signIn({ user, account, profile }) {
             // console.log(user, account, profile)
             if (account?.provider === 'github' || account?.provider === 'google') {
-                connectToDB();
+                await connectToDB();
                 try {
-                    const user = await User.findOne({ email: profile?.email });
-                    if (!user) {
+                    const dbUser = await User.findOne({ email: profile?.email });
+                    if (!dbUser) {
                         const newUser = await User.create({
                             username: profile?.login,
                             email: profile?.email,
@@ -82,6 +84,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             }
 
             return true;
-        }
+        },
+        ...authConfig.callbacks
     }
 })

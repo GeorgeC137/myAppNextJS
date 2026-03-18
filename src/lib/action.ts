@@ -7,9 +7,9 @@ import { signIn, signOut } from "./auth";
 import { FormState } from "./types";
 import bcrypt from "bcryptjs";
 
-export const addPost = async (formData: FormData) => {
+export const addPost = async (prevState: FormState | undefined, formData: FormData): Promise<FormState> => {
 
-    const { title, desc, slug, userId } = Object.fromEntries(formData);
+    const { title, desc, slug, img, userId } = Object.fromEntries(formData);
 
     try {
         connectToDB();
@@ -18,15 +18,52 @@ export const addPost = async (formData: FormData) => {
             title,
             desc,
             slug,
-            userId: Number(userId),
+            img,
+            userId
         });
 
         await newPost.save();
 
         console.log("Post added successfully to db!");
         revalidatePath("/blog?success=true");
+        revalidatePath("/admin");
+
+        return { success: true };
     } catch (error) {
         console.error("Error adding post:", error);
+        return { error: "Failed to add post" };
+    }
+
+    // console.log("Hello from the server!", title, desc, slug, Number(userId));
+}
+
+export const addUser = async (prevState: FormState | undefined, formData: FormData): Promise<FormState> => {
+
+    const { username, email, password, img, isAdmin } = Object.fromEntries(formData);
+
+    try {
+        connectToDB();
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password as string, salt);
+
+        const newUser = new User({
+            username,
+            email,
+            password: hashedPassword,
+            img,
+            isAdmin: isAdmin === "true",
+        });
+
+        await newUser.save();
+
+        console.log("User added successfully to db!");
+        revalidatePath("/admin");
+
+        return { success: true };
+    } catch (error) {
+        console.error("Error adding user:", error);
+        return { error: "Failed to add user" };
     }
 
     // console.log("Hello from the server!", title, desc, slug, Number(userId));
@@ -43,8 +80,30 @@ export const deletePost = async (formData: FormData) => {
 
         console.log("Post deleted successfully from db!");
         revalidatePath("/blog");
+        revalidatePath("/admin");
     } catch (error) {
         console.error("Error deleting post:", error);
+    }
+
+    // console.log("Hello from the server!", title, desc, slug, Number(userId));
+}
+
+export const deleteUser = async (formData: FormData) => {
+
+    const { id } = Object.fromEntries(formData);
+
+    try {
+        connectToDB();
+
+        // Delete user's posts first to maintain referential integrity
+        await Post.deleteMany({ userId: id });
+
+        await User.findByIdAndDelete(id);
+
+        console.log("User deleted successfully from db!");
+        revalidatePath("/admin");
+    } catch (error) {
+        console.error("Error deleting user:", error);
     }
 
     // console.log("Hello from the server!", title, desc, slug, Number(userId));

@@ -18,7 +18,7 @@ const Links = ({ session }: { session: Session }) => {
   const [open, setOpen] = useState(false);
 
   // TEMPORARY HARD-CODED AUTH VALUES
-  const isAdmin = true;
+  // const isAdmin = true;
 
 
   return (
