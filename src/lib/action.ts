@@ -6,6 +6,7 @@ import { connectToDB } from "./utils";
 import { signIn, signOut } from "./auth";
 import { FormState } from "./types";
 import bcrypt from "bcryptjs";
+import nodemailer from "nodemailer";
 
 export const addPost = async (prevState: FormState | undefined, formData: FormData): Promise<FormState> => {
 
@@ -181,5 +182,62 @@ export const login = async (prevState: FormState | undefined, formData: FormData
 
         // return { error: "Something went wrong!" };
         throw err; // Re-throw the error if it's not an instance of Error
+    }
+};
+
+export const sendContactEmail = async (
+    prevState: FormState | undefined,
+    formData: FormData
+): Promise<FormState> => {
+    const { name, email, phone, message } = Object.fromEntries(formData);
+
+    // Validation
+    if (!name || !email || !message) {
+        return {
+            error: "Name, email, and message are required",
+            timestamp: Date.now()
+        };
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email as string)) {
+        return { error: "Please enter a valid email address", timestamp: Date.now() };
+    }
+
+    try {
+        // Create transporter
+        const transporter = nodemailer.createTransport({
+            service: "gmail", // or 'smtp.gmail.com'
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASSWORD,
+            },
+        });
+
+        // Email options
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: process.env.EMAIL_TO || process.env.EMAIL_USER,
+            subject: `New Contact Form Submission from ${name}`,
+            html: `
+        <h2>New Contact Form Submission</h2>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Phone:</strong> ${phone || "Not provided"}</p>
+        <p><strong>Message:</strong></p>
+        <p>${message}</p>
+      `,
+            replyTo: email as string,
+        };
+
+        // Send email
+        await transporter.sendMail(mailOptions);
+
+        console.log("Email sent successfully");
+        return { success: true, timestamp: Date.now() };
+    } catch (error) {
+        console.error("Error sending email:", error);
+        return { error: "Failed to send message. Please try again later.", timestamp: Date.now() };
     }
 };

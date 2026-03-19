@@ -1,0 +1,71 @@
+/* components/contactForm/contactForm.module.css */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form input,
+.form textarea {
+    padding: 20px;
+    border-radius: 5px;
+    border: none;
+    outline: none;
+    background-color: var(--bgSoft);
+    color: var(--text);
+}
+
+.form input:disabled,
+.form textarea:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.form button {
+    padding: 20px;
+    background-color: var(--btn);
+    color: var(--text);
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.form button:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.form button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.success {
+    color: green;
+    padding: 10px;
+    background-color: rgba(0, 255, 0, 0.1);
+    border-radius: 5px;
+    text-align: center;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.error {
+    color: red;
+    padding: 10px;
+    background-color: rgba(255, 0, 0, 0.1);
+    border-radius: 5px;
+    text-align: center;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

@@ -50,4 +50,5 @@ export type Session = {
 export type FormState = {
     error?: string;
     success?: boolean;
+    timestamp?: number;
 }

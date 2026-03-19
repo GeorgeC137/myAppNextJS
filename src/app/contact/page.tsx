@@ -1,3 +1,4 @@
+import ContactForm from '@/components/contactForm/contactForm'
 import styles from './contact.module.css'
 import Image from 'next/image'
 // const HydrationTestNoSSR = dynamic(() => import('@/components/hydrationTest'), { ssr: false })
@@ -16,19 +17,7 @@ const ContactPage = () => {
       <div className={styles.formContainer}>
         {/* <HydrationTestNoSSR /> */}
         {/* <div suppressHydrationWarning>{a}</div> */}
-        <form action="" className={styles.form}>
-          <input type="text" placeholder="Name and Surname" />
-          <input type="text" placeholder="Email Address" />
-          <input type="text" placeholder="Phone Number (Optional)" />
-          <textarea
-            name=""
-            id=""
-            cols={30}
-            rows={10}
-            placeholder="Message"
-          ></textarea>
-          <button>Send</button>
-        </form>
+        <ContactForm />
       </div>
     </div>
   )
